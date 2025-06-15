@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,12 +11,33 @@
       margin: auto;
       padding: 20px;
     }
-    input, button {
+    input, button, select {
       padding: 8px;
       margin: 6px 0;
       width: 100%;
+      box-sizing: border-box;
+    }
+    .lang-select, .unit-select {
+      float: right;
+      width: auto;
+      margin-left: 10px;
+    }
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    @media (min-width: 500px) {
+      .controls {
+        flex-direction: row;
+        justify-content: space-between;
+      }
+    }
+    .table-wrapper {
+      overflow-x: auto;
     }
     table {
+      min-width: 600px;
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
@@ -32,66 +53,20 @@
   </style>
 </head>
 <body>
-  <h2>爆仓模拟器</h2>
+  <div class="controls">
+    <h2 id="title">爆仓模拟器</h2>
+    <div>
+      <select class="unit-select" id="unitSelect" onchange="updateUnit()">
+        <option value="USDT">USDT</option>
+        <option value="BTC">BTC</option>
+        <option value="SOL">SOL</option>
+      </select>
+      <select class="lang-select" id="langSelect" onchange="switchLang(this.value)">
+        <option value="zh">中文</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+  </div>
 
-  <label>总资金 (USDT)</label>
-  <input type="number" id="totalFunds" value="200" />
-
-  <label>初始开仓资金比例 (%)</label>
-  <input type="number" id="initialRatio" value="20" />
-
-  <label>杠杆倍数</label>
-  <input type="number" id="leverage" value="10" />
-
-  <label>开仓价格 ($)</label>
-  <input type="number" id="entryPrice" value="0.0045" step="0.00001" />
-
-  <button onclick="simulate()">生成爆仓模拟表</button>
-
-  <table id="resultTable">
-    <thead>
-      <tr>
-        <th>反弹价</th>
-        <th>涨幅 (%)</th>
-        <th>浮亏 (USDT)</th>
-        <th>是否爆仓</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <script>
-    function simulate() {
-      const totalFunds = parseFloat(document.getElementById('totalFunds').value);
-      const initialRatio = parseFloat(document.getElementById('initialRatio').value) / 100;
-      const leverage = parseFloat(document.getElementById('leverage').value);
-      const entryPrice = parseFloat(document.getElementById('entryPrice').value);
-
-      const marginUsed = totalFunds * initialRatio;
-      const positionValue = marginUsed * leverage;
-      const positionSize = positionValue / entryPrice;
-
-      const tbody = document.querySelector('#resultTable tbody');
-      tbody.innerHTML = '';
-
-      for (let pct = 0; pct <= 60; pct += 2) {
-        const reboundPrice = entryPrice * (1 + pct / 100);
-        const loss = (reboundPrice - entryPrice) * positionSize;
-        const isLiquidated = loss >= totalFunds ? '是' : '否';
-
-        const row = `
-          <tr>
-            <td>${reboundPrice.toFixed(6)}</td>
-            <td>${pct}%</td>
-            <td>${loss.toFixed(2)}</td>
-            <td>${isLiquidated}</td>
-          </tr>
-        `;
-        tbody.innerHTML += row;
-
-        if (isLiquidated === '是') break;
-      }
-    }
-  </script>
-</body>
-</html>
+  <label id="labelTotalFunds">总资金</label>
+  <input type="numbe
