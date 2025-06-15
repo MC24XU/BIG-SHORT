@@ -69,4 +69,129 @@
   </div>
 
   <label id="labelTotalFunds">总资金</label>
-  <input type="numbe
+  <input type="number" id="totalFunds" value="200" />
+
+  <label id="labelInitialRatio">初始开仓资金比例 (%)</label>
+  <input type="number" id="initialRatio" value="20" />
+
+  <label id="labelLeverage">杠杆倍数</label>
+  <input type="number" id="leverage" value="10" />
+
+  <label id="labelEntryPrice">开仓价格 ($)</label>
+  <input type="number" id="entryPrice" value="0.0045" step="0.00001" />
+
+  <button onclick="simulate()" id="simulateBtn">生成爆仓模拟表</button>
+
+  <div class="table-wrapper">
+    <table id="resultTable">
+      <thead>
+        <tr>
+          <th id="thPrice">反弹价</th>
+          <th id="thPct">涨幅 (%)</th>
+          <th id="thLoss">浮亏</th>
+          <th id="thLiquidated">是否爆仓</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const langText = {
+      zh: {
+        title: "爆仓模拟器",
+        totalFunds: "总资金",
+        initialRatio: "初始开仓资金比例 (%)",
+        leverage: "杠杆倍数",
+        entryPrice: "开仓价格 ($)",
+        simulate: "生成爆仓模拟表",
+        reboundPrice: "反弹价",
+        pct: "涨幅 (%)",
+        loss: "浮亏",
+        liquidated: "是否爆仓",
+        yes: "是",
+        no: "否"
+      },
+      en: {
+        title: "Liquidation Simulator",
+        totalFunds: "Total Funds",
+        initialRatio: "Initial Position Ratio (%)",
+        leverage: "Leverage",
+        entryPrice: "Entry Price ($)",
+        simulate: "Generate Table",
+        reboundPrice: "Rebound Price",
+        pct: "Rebound (%)",
+        loss: "Unrealized Loss",
+        liquidated: "Liquidated",
+        yes: "Yes",
+        no: "No"
+      }
+    };
+
+    let currentLang = localStorage.getItem("lang") || "zh";
+    let currentUnit = localStorage.getItem("unit") || "USDT";
+
+    function switchLang(lang) {
+      currentLang = lang;
+      localStorage.setItem("lang", lang);
+      updateLang();
+    }
+
+    function updateUnit() {
+      currentUnit = document.getElementById("unitSelect").value;
+      localStorage.setItem("unit", currentUnit);
+      updateLang(); // 更新单位显示
+    }
+
+    function updateLang() {
+      const t = langText[currentLang];
+      document.getElementById("title").textContent = t.title;
+      document.getElementById("labelTotalFunds").textContent = `${t.totalFunds} (${currentUnit})`;
+      document.getElementById("labelInitialRatio").textContent = t.initialRatio;
+      document.getElementById("labelLeverage").textContent = t.leverage;
+      document.getElementById("labelEntryPrice").textContent = t.entryPrice;
+      document.getElementById("simulateBtn").textContent = t.simulate;
+      document.getElementById("thPrice").textContent = t.reboundPrice;
+      document.getElementById("thPct").textContent = t.pct;
+      document.getElementById("thLoss").textContent = `${t.loss} (${currentUnit})`;
+      document.getElementById("thLiquidated").textContent = t.liquidated;
+      document.getElementById("langSelect").value = currentLang;
+      document.getElementById("unitSelect").value = currentUnit;
+    }
+
+    function simulate() {
+      const t = langText[currentLang];
+      const totalFunds = parseFloat(document.getElementById('totalFunds').value);
+      const initialRatio = parseFloat(document.getElementById('initialRatio').value) / 100;
+      const leverage = parseFloat(document.getElementById('leverage').value);
+      const entryPrice = parseFloat(document.getElementById('entryPrice').value);
+
+      const marginUsed = totalFunds * initialRatio;
+      const positionValue = marginUsed * leverage;
+      const positionSize = positionValue / entryPrice;
+
+      const tbody = document.querySelector('#resultTable tbody');
+      tbody.innerHTML = '';
+
+      for (let pct = 0; pct <= 60; pct += 2) {
+        const reboundPrice = entryPrice * (1 + pct / 100);
+        const loss = (reboundPrice - entryPrice) * positionSize;
+        const isLiquidated = loss >= totalFunds ? t.yes : t.no;
+
+        const row = `
+          <tr>
+            <td>${reboundPrice.toFixed(6)}</td>
+            <td>${pct}%</td>
+            <td>${loss.toFixed(4)} ${currentUnit}</td>
+            <td>${isLiquidated}</td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+        if (isLiquidated === t.yes) break;
+      }
+    }
+
+    updateLang(); // 初始化语言与单位
+  </script>
+</body>
+</html>
