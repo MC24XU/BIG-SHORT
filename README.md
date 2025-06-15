@@ -2,7 +2,7 @@
 
 这是一个纯前端的爆仓模拟器网页工具，用于帮助用户在使用杠杆做空合约时，模拟资产浮亏和爆仓临界点。
 
-📍 [在线访问 Demo 页面](https://https://mc24xu.github.io/BIG-SHORT/
+📍 [在线访问 Demo 页面](mc24xu.github.io/BIG-SHORT/)
 
 ---
 
